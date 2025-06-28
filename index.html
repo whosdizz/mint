@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,7 +52,7 @@
   <script>
     const contractAddress = "0x54578D2f2B5B9F8d50CFE2fa1D6a02fa6Ef5c3BB";
     const abi = [
-      "function mint(address to, string memory tokenURI) public"
+      "function mint(string memory tokenURI) public"
     ];
     const tokenURI = "ipfs://bafkreigryn3raal2ri3om2w72ajitkdglkmhfydvuekhubvxzspod2nj74";
     let signer;
@@ -76,8 +75,7 @@
     async function mint() {
       try {
         const contract = new ethers.Contract(contractAddress, abi, signer);
-        const userAddress = await signer.getAddress();
-        const tx = await contract.mint(userAddress, tokenURI);
+        const tx = await contract.mint(tokenURI, { gasLimit: 200000 });
 
         document.getElementById("status").innerText = "⏳ Minting in progress...";
         await tx.wait();
