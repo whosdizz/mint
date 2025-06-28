@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Mint SONG1 – WHOSDIZZ</title>
+  <title>🎶 Mint Magic – WHOSDIZZ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
@@ -38,21 +38,24 @@
   </style>
 </head>
 <body>
-  <h1>🎵 Mint SONG1</h1>
-  <p>by WHOSDIZZ · Limited to 1000 copies</p>
+  <h1 style="font-size: 2.5em;">✨ Mint <em>SONG1</em></h1>
+  <p style="font-size: 1.2em;">🚀 WHOSDIZZ is dropping heat. Grab 1 of 1000 before it’s gone.</p>
   <img class="cover" src="https://gateway.pinata.cloud/ipfs/bafybeialjf2537kwjsohff4sg6fwfs56rzk4d3tfjd63jjijdiexi6mx7i" alt="Cover Art">
   <br>
   <button onclick="connectWallet()">🔌 Connect Wallet</button>
   <div id="walletInfo" style="margin-top:10px;"></div>
   <div id="mintSection" style="display:none;">
     <button onclick="mint()">🪙 Mint Now</button>
+    <div id="mintCount" style="margin-top:10px; font-size: 16px;"></div>
     <div id="status"></div>
   </div>
 
   <script>
     const contractAddress = "0x54578D2f2B5B9F8d50CFE2fa1D6a02fa6Ef5c3BB";
     const abi = [
-      "function mint(string memory tokenURI) public"
+      "function mint(string memory tokenURI) public",
+      "function totalSupply() public view returns (uint256)",
+      "function maxSupply() public view returns (uint256)"
     ];
     const tokenURI = "ipfs://bafkreigryn3raal2ri3om2w72ajitkdglkmhfydvuekhubvxzspod2nj74";
     let signer;
@@ -66,10 +69,21 @@
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
       signer = provider.getSigner();
-      const address = await signer.getAddress();
 
-      document.getElementById("walletInfo").innerText = `✅ Connected: ${address}`;
+      document.getElementById("walletInfo").innerText = "✅ CONNECTED.";
       document.getElementById("mintSection").style.display = "block";
+
+      updateMintCount(new ethers.Contract(contractAddress, abi, signer));
+    }
+
+    async function updateMintCount(contract) {
+      try {
+        const total = await contract.totalSupply();
+        const max = await contract.maxSupply();
+        document.getElementById("mintCount").innerText = `🎫 ${max - total.toNumber()} NFTs left to mint`;
+      } catch (err) {
+        document.getElementById("mintCount").innerText = "";
+      }
     }
 
     async function mint() {
@@ -80,6 +94,7 @@
         document.getElementById("status").innerText = "⏳ Minting in progress...";
         await tx.wait();
         document.getElementById("status").innerText = "✅ Minted successfully!";
+        updateMintCount(contract);
       } catch (err) {
         console.error(err);
         document.getElementById("status").innerText = "❌ Minting failed.";
