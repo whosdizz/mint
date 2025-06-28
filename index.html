@@ -51,7 +51,7 @@
   </div>
 
   <script>
-    const contractAddress = "0x54578D2f2B5B9F8d50CFE2fa1D6a02fa6Ef5c3BB";
+    const contractAddress = "0x98B393Bbde720013287F5d409EE518933AB8a5ad";
     const abi = [
       "function mint(address to, string memory tokenURI) public"
     ];
@@ -77,7 +77,7 @@
       try {
         const contract = new ethers.Contract(contractAddress, abi, signer);
         const userAddress = await signer.getAddress();
-        const tx = await contract.mint(tokenURI);
+        const tx = await contract.mint(userAddress, tokenURI);
 
         document.getElementById("status").innerText = "⏳ Minting in progress...";
         await tx.wait();
