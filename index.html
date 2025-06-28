@@ -77,7 +77,7 @@
       try {
         const contract = new ethers.Contract(contractAddress, abi, signer);
         const userAddress = await signer.getAddress();
-        const tx = await contract.mint(userAddress, tokenURI);
+        const tx = await contract.mint(tokenURI);
 
         document.getElementById("status").innerText = "⏳ Minting in progress...";
         await tx.wait();
