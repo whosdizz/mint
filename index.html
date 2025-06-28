@@ -19,7 +19,7 @@
       background-color: #ff4f00;
       color: #fff;
       border: none;
-      padding: 16px 32px;
+      padding: 14px 28px;
       font-size: 18px;
       border-radius: 10px;
       cursor: pointer;
@@ -43,33 +43,45 @@
   <p>by WHOSDIZZ · Limited to 1000 copies</p>
   <img class="cover" src="https://gateway.pinata.cloud/ipfs/bafybeialjf2537kwjsohff4sg6fwfs56rzk4d3tfjd63jjijdiexi6mx7i" alt="Cover Art">
   <br>
-  <button onclick="mint()">Mint Now</button>
-  <div id="status">🔌 Connect your wallet to mint</div>
+  <button onclick="connectWallet()">🔌 Connect Wallet</button>
+  <div id="walletInfo" style="margin-top:10px;"></div>
+  <div id="mintSection" style="display:none;">
+    <button onclick="mint()">🪙 Mint Now</button>
+    <div id="status"></div>
+  </div>
 
   <script>
-    const contractAddress = "0xYourContractAddressHere";
+    const contractAddress = "0x98B393Bbde720013287F5d409EE518933AB8a5ad";
     const abi = [
-      "function mint(address to, string memory tokenURI) public",
+      "function mint(address to, string memory tokenURI) public"
     ];
     const tokenURI = "ipfs://bafkreigryn3raal2ri3om2w72ajitkdglkmhfydvuekhubvxzspod2nj74";
+    let signer;
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("🦊 Please install MetaMask to continue.");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      const address = await signer.getAddress();
+
+      document.getElementById("walletInfo").innerText = `✅ Connected: ${address}`;
+      document.getElementById("mintSection").style.display = "block";
+    }
 
     async function mint() {
       try {
-        if (!window.ethereum) {
-          return document.getElementById("status").innerText = "🦊 Please install MetaMask.";
-        }
-
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-
         const contract = new ethers.Contract(contractAddress, abi, signer);
-        const tx = await contract.mint(address, tokenURI);
+        const userAddress = await signer.getAddress();
+        const tx = await contract.mint(userAddress, tokenURI);
 
         document.getElementById("status").innerText = "⏳ Minting in progress...";
         await tx.wait();
-        document.getElementById("status").innerText = "✅ NFT minted to " + address;
+        document.getElementById("status").innerText = "✅ Minted successfully!";
       } catch (err) {
         console.error(err);
         document.getElementById("status").innerText = "❌ Minting failed.";
